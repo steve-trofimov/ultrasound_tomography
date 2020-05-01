@@ -24,8 +24,6 @@ int main(int ac, char* av[]) {
     oneToF_desc.add_options()
             ("input_dir,I", po::value<std::string>(), "Input directory with data")
             ("number_emmiter", po::value<int>(), "Sensor number of interest")
-            ("output_ToF,O", po::value<std::string>(), "Result ToF .txt file")
-            ("output_read,O", po::value<std::string>(), "Read result .txt file")
             ;
     po::variables_map vm;
     try {
@@ -48,7 +46,7 @@ int main(int ac, char* av[]) {
             oneToF(vm);
         }
         else {
-            desc.add(ToF_desc).add(detection_desc);
+            desc.add(ToF_desc).add(detection_desc).add(oneToF_desc);
             std::cout << desc << "\n";
             return -1;
         }

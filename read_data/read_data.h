@@ -4,7 +4,8 @@
 
 std::vector<int16_t> readFromOneFile(const std::string name, const int &nEmitter) {
     int elements_num = 2048, time_points_num = 3750;
-    int offset = (elements_num / 4) * time_points_num * nEmitter * sizeof(int16_t);
+    long long offset = (elements_num / 4) * time_points_num * sizeof(int16_t);
+    offset *= nEmitter - 1;
     std::ifstream file(name, std::fstream::binary);
     int lenght = time_points_num * elements_num / 4;
     std::vector<int16_t> result;

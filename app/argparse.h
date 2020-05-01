@@ -44,7 +44,7 @@ void ToF(const po::variables_map &vm) {
 
     std::ofstream outAll(output);
     for (int i = 0; i < size; i++) {
-        std::vector<std::vector<int>> oneEmmiterPtr = readEmitter(input_dir, i);
+        std::vector<std::vector<int>> oneEmmiterPtr = readEmitter(input_dir, i + 1);
         for (int j = 0; j < size; j++) {
             int resultOne = oneToF(oneEmmiterPtr[j], numberOfWaves, windowAkaike, cutoffLevel)[0];
             outAll << resultOne << " ";
@@ -65,23 +65,23 @@ void oneToF(const po::variables_map &vm) {
     int numberEmmiter;
     if (vm.count("input_dir"))
         input_dir = vm["input_dir"].as<std::string>();
-    if (vm.count("output_ToF"))
-        outputToF = vm["output_ToF"].as<std::string>();
     if (vm.count("number_emmiter"))
         numberEmmiter = vm["number_emmiter"].as<int>();
-    if (vm.count("output_read"))
-        outputRead = vm["output_read"].as<std::string>();
 
-    std::ofstream outAll(outputToF), outRead(outputRead);
-    std::vector<std::vector<int>> oneEmmiterPtr = readEmitter(input_dir, numberEmmiter);
+    outputToF = "ToF_result_of_emmiter_" + std::to_string(numberEmmiter) + ".txt";
+//    outputRead = "read_data_from_emmiter_" + std::to_string(numberEmmiter) + ".txt";
+
+    std::ofstream out(outputToF); //outRead(outputRead);
+    std::vector<std::vector<int>> oneEmmiterPtr = readEmitter(input_dir, numberEmmiter + 1);
     for (int j = 0; j < size; j++) {
         int resultOne = oneToF(oneEmmiterPtr[j], numberOfWaves, windowAkaike, cutoffLevel)[0];
-        outAll << resultOne << " ";
-        for (int i = 0; i < oneEmmiterPtr[j].size(); i++) {
-            outRead << oneEmmiterPtr[j][i] << " ";
-        }
-        outRead << "\n";
+        out << resultOne << " ";
+//        for (int i = 0; i < oneEmmiterPtr[j].size(); i++) {
+//            outRead << oneEmmiterPtr[j][i] << " ";
+//        }
+//        outRead << "\n";
     }
+    std::cout << "Done!\n";
 }
 
 void detection(const po::variables_map &vm) {
