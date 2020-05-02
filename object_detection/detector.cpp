@@ -25,7 +25,7 @@ void detector::findingDifferences(const int threshold, const int indent) {
     double eps = 0.5;
     int test = 0;
     std::set<int> brokenSensor = {528, 1024, 1025, 1026, 1027, 1028, 1029, 1031, 1152, 1154, 1155, 1156, 1157, 1158, 1188};
-    for (int i = 0; i < 1; i ++) {
+    for (int i = 0; i < 2048; i ++) {
         int count = 0;
         for (int j = (i + 255) % 2048; count < 2048 - 2 * indent; j = (j + 1) % 2048) {
             count++;
@@ -35,7 +35,6 @@ void detector::findingDifferences(const int threshold, const int indent) {
                 test++;
                 //line x = x[i]
                 if (std::abs(posEmmiters[i][0] - posEmmiters[j][0]) < eps) {
-                    std::cout << j << " it is j in x\n";
                     for (int x = 1; x < 2047; x++) {
                         if (std::abs(x - (posEmmiters[i][0] + posEmmiters[j][0]) / 2) < eps) {
                             for (int y = 1; y < 2047; y++) {
@@ -48,7 +47,6 @@ void detector::findingDifferences(const int threshold, const int indent) {
                 }
                 //line y = y[i]
                 else if (std::abs(posEmmiters[i][1] - posEmmiters[j][1]) < eps) {
-                    std::cout << j << " it is j in x\n";
                     for (int y = 0; y < 2048; y++) {
                         if (std::abs(y - (posEmmiters[i][1] + posEmmiters[j][1]) / 2) < eps) {
                             for (int x = 0; x < 2048; x++) {
