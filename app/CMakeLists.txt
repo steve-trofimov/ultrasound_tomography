@@ -4,4 +4,4 @@ ADD_EXECUTABLE(app ${SRCS} ../object_detection/detector.cpp ../object_detection/
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 
-TARGET_LINK_LIBRARIES(app oneToF read_data detector ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(app oneToF read_data detector systemEquations rungekutta ${Boost_LIBRARIES})
