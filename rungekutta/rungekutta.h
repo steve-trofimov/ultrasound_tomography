@@ -19,6 +19,8 @@ public:
     double y() { return _y; }
     double nx() { return _nx; }
     double ny() { return _ny; }
+    void nxSet(const double &nx) { _nx = nx; }
+    void nySet(const double &ny) { _ny = ny; }
 };
 
 int emitterNumberSearch(std::vector<emmiter> emmiters, Eigen::VectorXd coor) {
