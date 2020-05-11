@@ -2,11 +2,12 @@
 
 
 int main(int ac, char* av[]) {
+
     po::options_description desc("General options");
     std::string task_type;
     desc.add_options()
             ("help,h", "Show help")
-            ("type,t", po::value<std::string>(&task_type), "Select task: ToF, detection, oneToF, optimization")
+            ("type,t", po::value<std::string>(&task_type), "Select task: ToF, detection, oneToF, optimization_big, optimization_small")
             ;
     po::options_description ToF_desc("ToF options");
     ToF_desc.add_options()
@@ -26,8 +27,14 @@ int main(int ac, char* av[]) {
             ("input_dir,I", po::value<std::string>(), "Input directory with data")
             ("number_emmiter", po::value<int>(), "Sensor number of interest")
             ;
-    po::options_description optimization_desc("Optimization options");
-    optimization_desc.add_options()
+    po::options_description optimization_big_desc("Optimization big options");
+    optimization_big_desc.add_options()
+            ("input_ToF", po::value<std::string>(), "Input ToF result")
+            ("input_detection", po::value<std::string>(), "Input detection result")
+            ("info", po::value<bool>(), "Display information")
+            ;
+    po::options_description optimization_small_desc("Optimization small options");
+    optimization_small_desc.add_options()
             ("input_ToF", po::value<std::string>(), "Input ToF result")
             ("input_detection", po::value<std::string>(), "Input detection result")
             ("info", po::value<bool>(), "Display information")
@@ -52,13 +59,18 @@ int main(int ac, char* av[]) {
             po::store(po::parse_command_line(ac, av, desc), vm);
             oneToF(vm);
         }
-        else if(task_type == "optimization") {
-            desc.add(optimization_desc);
+        else if(task_type == "optimization_big") {
+            desc.add(optimization_big_desc);
             po::store(po::parse_command_line(ac, av, desc), vm);
-            objSpeedOptimization(vm);
+            objSpeedOptimizationFromBig(vm);
+        }
+        else if(task_type == "optimization_small") {
+            desc.add(optimization_small_desc);
+            po::store(po::parse_command_line(ac, av, desc), vm);
+            objSpeedOptimizationFromSmall(vm);
         }
         else {
-            desc.add(ToF_desc).add(detection_desc).add(oneToF_desc).add(optimization_desc);
+            desc.add(ToF_desc).add(detection_desc).add(oneToF_desc).add(optimization_big_desc).add(optimization_small_desc);
             std::cout << desc << "\n";
             return -1;
         }

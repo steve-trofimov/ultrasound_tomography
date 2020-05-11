@@ -34,7 +34,96 @@ const double endT = 3., startT = 0., h = 1./1000.;
 
 namespace po = boost::program_options;
 
-void objSpeedOptimization(const po::variables_map &vm) {
+void objSpeedOptimizationFromSmall(const po::variables_map &vm) {
+    std::string input_ToF, input_detection;
+    bool info;
+    if (vm.count("input_ToF"))
+        input_ToF = vm["input_ToF"].as<std::string>();
+    if (vm.count("input_detection"))
+        input_detection = vm["input_detection"].as<std::string>();
+    if (vm.count("info"))
+        info = vm["info"].as<bool>();
+
+    //init emmiters
+    std::vector<emmiter> emmiters;
+
+    for (int i = 0; i < 2048 + 56; i++) { // i < 2048 + 56
+        if (!((i % (256 + 8)) < 8  && i > 8)) {
+            emmiter temp(size / 2 + size / 2 * std::cos(2 * M_PI * i / (size + 64)),
+                         size / 2 + size / 2 * std::sin(2 * M_PI * i / (size + 64)),
+                         size / 2);
+            emmiters.push_back(temp);
+        }
+    }
+
+    //init ToF
+    std::ifstream ToFfile(input_ToF);
+
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ToFMat;
+    ToFMat.resize(size, size);
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            int tempToF;
+            ToFfile >> tempToF;
+            ToFMat(i, j) = tempToF;
+        }
+    }
+
+    std::vector<double> optSpeedValue;
+
+    for (int i = emmiters.size() - 128; i != 128; i = (i + 16) % emmiters.size()) {
+
+        double minError = std::numeric_limits<double>::max(), resultObjSpeed;
+
+        for(int objSpeed = waterSpeed - 200; objSpeed <= waterSpeed + 200; objSpeed += 10) {
+
+            std::fstream inputMatrix(input_detection);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> fieldMat;
+            fieldMat.resize(size, size);
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    int temp;
+                    inputMatrix >> temp;
+                    if (temp > 300 || ((i - 1024) * (i - 1024) + (j - 1024) * (j - 1024) > 1000 * 1000))
+                        fieldMat(i, j) = waterSpeed;
+                    else
+                        fieldMat(i, j) = objSpeed;
+                }
+            }
+
+            RungeKutta RK;
+            systemEquation numericalRhs(fieldMat, waterSpeed);
+
+            auto startTimer = timer::now();
+            double timeForRK = 0;
+            auto path = RK.functor(startT, endT, h, emmiters[i], numericalRhs, timeForRK);
+            int number = emitterNumberSearch(emmiters, path.back());
+
+            double error = (timeForRK * 22 / 100 / 2048 - (ToFMat(i, number) + 248) / 25 / 1000000) *
+                           (timeForRK * 22 / 100 / 2048 - (ToFMat(i, number) + 248) / 25 / 1000000);
+
+            std::chrono::duration<double> dur = timer::now() - startTimer;
+
+            if (info)
+                std::cout << "\t Object speed: " << objSpeed << ", emmiter " << i << " is complite, RK time: " << dur.count() << "\n";
+
+            if (error < minError) {
+                minError = error;
+                resultObjSpeed = objSpeed;
+            }
+        }
+        optSpeedValue.push_back(resultObjSpeed);
+        std::cout << "\t Optimal object speed: " << resultObjSpeed << ", for emmiter " << i << "\n";
+    }
+
+    double averageResult = 0;
+    for (auto iter : optSpeedValue)
+        averageResult += iter;
+    std::cout << "\t Average result: " << averageResult << "\n";
+}
+
+void objSpeedOptimizationFromBig(const po::variables_map &vm) {
     std::string input_ToF, input_detection;
     bool info;
     if (vm.count("input_ToF"))
